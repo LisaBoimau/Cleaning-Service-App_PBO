@@ -8,5 +8,6 @@ import java.util.List;
 @Repository
 public interface PekerjaRepository extends JpaRepository<Pekerja, Long> {
     List<Pekerja> findByStatus(String status);
+    java.util.Optional<Pekerja> findFirstByStatusOrderByRatingDesc(String status);
     java.util.Optional<Pekerja> findByEmail(String email);
 }
