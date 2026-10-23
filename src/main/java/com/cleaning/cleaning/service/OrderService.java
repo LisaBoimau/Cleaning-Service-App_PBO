@@ -45,10 +45,9 @@ public class OrderService {
         }
         if (pekerja == null) {
             // Fallback: ambil pekerja available dengan rating tertinggi
-            List<Pekerja> available = pekerjaRepository.findByStatus("available");
-            pekerja = available.stream()
-                    .max(java.util.Comparator.comparingDouble(Pekerja::getRating))
-                    .orElse(null);
+            // ⚡ Bolt: Use optimized query to fetch only the highest rated available worker
+            // Reduces memory usage and processing time compared to fetching all available workers
+            pekerja = pekerjaRepository.findFirstByStatusOrderByRatingDesc("available").orElse(null);
         }
         if (pekerja != null) {
             order.setPekerja(pekerja);

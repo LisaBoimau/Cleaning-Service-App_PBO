@@ -1,0 +1,3 @@
+## 2026-10-23 - Avoid in-memory stream operations on JPA queries
+**Learning:** Found an anti-pattern in `OrderService` where `pekerjaRepository.findByStatus("available")` was used to fetch *all* available records into memory, just to find the one with the maximum rating using Java Stream API `.max(Comparator.comparingDouble(...))`. This can cause severe memory and performance bottlenecks if the table size grows.
+**Action:** Always prefer delegating sorting and limit queries to the database. Use Spring Data JPA method conventions like `findFirstByStatusOrderByRatingDesc` to achieve this directly via SQL.
