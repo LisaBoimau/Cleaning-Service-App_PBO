@@ -1,0 +1,3 @@
+## YYYY-MM-DD - In-Memory Collection Sorting Bottlenecks
+**Learning:** Pushing sorting and limiting logic (e.g., finding the max) to the application layer via Streams after loading a large list of rows from the database (e.g., all "available" workers) creates an unnecessary performance and memory bottleneck (loading O(N) rows instead of 1).
+**Action:** Push sorting and limit constraints down to the database using Spring Data JPA method naming conventions (like `findFirstBy...OrderBy...Desc`) to reduce database I/O, application memory usage, and execution time.
