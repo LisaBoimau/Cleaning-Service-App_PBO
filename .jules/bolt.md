@@ -1,0 +1,3 @@
+## 2023-10-25 - [Spring Data JPA In-Memory Sort Anti-Pattern]
+**Learning:** Found a specific anti-pattern in the application logic where `findAll` or broad `findByStatus` queries are used to fetch all entities into application memory, followed by Java Streams (`.max()`) to perform sorting and limiting. This is an O(N) memory bottleneck for finding a single best record (e.g., best-rated worker).
+**Action:** Always inspect service layer methods containing `.stream().max()` or `.stream().sorted().findFirst()` and replace them with dedicated Spring Data JPA repository query methods like `findFirstBy...OrderBy...Desc()` to push sorting and limiting down to the database (O(1) memory).
