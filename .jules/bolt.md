@@ -1,0 +1,3 @@
+## 2023-10-27 - Database Query Optimization vs Memory Streams
+**Learning:** Found an anti-pattern in the codebase where Java Streams (e.g. `.stream().max(...)`) are used on full repository lists (`findByStatus`) instead of pushing the aggregation/sorting logic to the database. This causes O(N) memory complexity for operations that could be O(1) memory overhead.
+**Action:** Always check Spring Data JPA repository usage for operations that pull large lists into memory just to find a single max/min or paginated result, and replace them with optimized derived query methods (e.g. `findFirstBy...OrderBy...`).
