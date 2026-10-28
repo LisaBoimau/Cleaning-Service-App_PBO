@@ -1,0 +1,3 @@
+## 2024-10-28 - [Avoid In-Memory Sorting for Database Records]
+**Learning:** [Fetching a large number of records from the database and sorting them in memory using Java Streams (e.g., `findAll().stream().max(...)`) can cause significant memory and CPU overhead as the dataset grows. In a Spring Boot app, this pattern is a common performance bottleneck.]
+**Action:** [Use database-level sorting and limiting (e.g., `findFirstBy...OrderBy...Desc`) directly in the Spring Data JPA repository. This offloads the sorting operation to the database which is optimized for such tasks, and drastically reduces the amount of data transferred and processed in memory.]
