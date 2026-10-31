@@ -1,0 +1,3 @@
+## 2024-05-24 - Database Aggregation Offloading
+**Learning:** The application was loading entire collections into memory for filtering, sorting, or simple aggregations using Java Streams (e.g., getting maximum rating or calculating average rating). This is a severe anti-pattern for Spring Data JPA applications that can lead to memory leaks and N+1 query problems as the database grows.
+**Action:** Always prefer offloading these operations to the database via Spring Data JPA derived queries (like `findFirstByStatusOrderByRatingDesc`) or custom `@Query` with aggregate functions (like `SELECT AVG(...)`) to reduce memory footprint and improve execution speed.
