@@ -9,4 +9,7 @@ import java.util.List;
 public interface PekerjaRepository extends JpaRepository<Pekerja, Long> {
     List<Pekerja> findByStatus(String status);
     java.util.Optional<Pekerja> findByEmail(String email);
+
+    // Performance optimization: Find the available worker with the highest rating directly in DB
+    Pekerja findFirstByStatusOrderByRatingDesc(String status);
 }

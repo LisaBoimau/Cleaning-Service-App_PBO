@@ -1,0 +1,3 @@
+## 2024-05-24 - Avoid In-Memory Data Aggregation
+**Learning:** Found a critical performance anti-pattern in `OrderService` where the entire collection of orders for a worker was loaded into memory just to calculate their average rating, and another case where all available workers were loaded into memory to find the one with the highest rating. This `O(N)` memory/computation cost scales poorly as data grows.
+**Action:** Always offload filtering, sorting, and aggregations (e.g. `AVG`) to the database using Spring Data JPA derived queries or custom `@Query` to drastically reduce memory overhead and latency.
