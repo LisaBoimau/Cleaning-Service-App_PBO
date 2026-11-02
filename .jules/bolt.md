@@ -1,0 +1,3 @@
+## 2024-11-02 - Memory Optimization for Collections Aggregation
+**Learning:** Found instances of loading entire collections into memory in `OrderService` (e.g., getting all available workers to find the max rating, and getting all orders for a worker to find the average rating) just to perform simple sorting or aggregation with Java Streams. This is a severe performance bottleneck and memory hog as the data grows.
+**Action:** Always offload filtering, sorting, and aggregation to the database using Spring Data JPA derived queries (e.g. `findFirstBy...`) or custom `@Query` with aggregate functions like `AVG()`.
