@@ -1,0 +1,3 @@
+## 2026-11-03 - Database Aggregations
+**Learning:** Found significant N+1 and in-memory aggregation anti-patterns in OrderService where the entire list of workers or orders was loaded to calculate maximum or average ratings using Java Streams. When updating records before an aggregate query in the same transaction, calling saveAndFlush() is critical to ensure the aggregation incorporates the newly updated state.
+**Action:** Always offload MAX() and AVG() operations to the database using Spring Data JPA derived queries (e.g., findFirstBy...OrderByDesc) or custom @Query with COALESCE to handle nulls, and ensure data is flushed before querying.
