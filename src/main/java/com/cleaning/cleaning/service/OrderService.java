@@ -44,11 +44,9 @@ public class OrderService {
             pekerja = pekerjaRepository.findById(pekerjaId).orElse(null);
         }
         if (pekerja == null) {
+            // ⚡ Bolt: Use optimized database query instead of loading all available workers into memory
             // Fallback: ambil pekerja available dengan rating tertinggi
-            List<Pekerja> available = pekerjaRepository.findByStatus("available");
-            pekerja = available.stream()
-                    .max(java.util.Comparator.comparingDouble(Pekerja::getRating))
-                    .orElse(null);
+            pekerja = pekerjaRepository.findFirstByStatusOrderByRatingDesc("available").orElse(null);
         }
         if (pekerja != null) {
             order.setPekerja(pekerja);
@@ -81,12 +79,9 @@ public class OrderService {
         order.berikanRating(nilai, komentar);
         if (order.getPekerja() != null) {
             Pekerja pekerja = order.getPekerja();
-            List<Order> orderPekerja = orderRepository.findByPekerjaId(pekerja.getId());
-            double rataRating = orderPekerja.stream()
-                    .filter(o -> o.getNilaiRating() > 0)
-                    .mapToInt(Order::getNilaiRating)
-                    .average()
-                    .orElse(nilai);
+            // ⚡ Bolt: Offload calculating average rating to database instead of loading all orders into memory
+            Double averageRating = orderRepository.findAverageRatingByPekerjaId(pekerja.getId());
+            double rataRating = (averageRating != null) ? averageRating : nilai;
             pekerja.setRating(rataRating);
             pekerjaRepository.save(pekerja);
         }
