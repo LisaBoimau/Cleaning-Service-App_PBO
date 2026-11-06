@@ -9,4 +9,7 @@ import java.util.List;
 public interface PekerjaRepository extends JpaRepository<Pekerja, Long> {
     List<Pekerja> findByStatus(String status);
     java.util.Optional<Pekerja> findByEmail(String email);
+
+    // ⚡ Bolt: Offload sorting and limiting to the database
+    java.util.Optional<Pekerja> findFirstByStatusOrderByRatingDesc(String status);
 }
