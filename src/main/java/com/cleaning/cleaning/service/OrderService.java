@@ -45,9 +45,8 @@ public class OrderService {
         }
         if (pekerja == null) {
             // Fallback: ambil pekerja available dengan rating tertinggi
-            List<Pekerja> available = pekerjaRepository.findByStatus("available");
-            pekerja = available.stream()
-                    .max(java.util.Comparator.comparingDouble(Pekerja::getRating))
+            // BOLT OPTIMIZATION: Replaced memory-intensive stream sorting with direct DB query
+            pekerja = pekerjaRepository.findFirstByStatusOrderByRatingDesc("available")
                     .orElse(null);
         }
         if (pekerja != null) {
@@ -81,13 +80,9 @@ public class OrderService {
         order.berikanRating(nilai, komentar);
         if (order.getPekerja() != null) {
             Pekerja pekerja = order.getPekerja();
-            List<Order> orderPekerja = orderRepository.findByPekerjaId(pekerja.getId());
-            double rataRating = orderPekerja.stream()
-                    .filter(o -> o.getNilaiRating() > 0)
-                    .mapToInt(Order::getNilaiRating)
-                    .average()
-                    .orElse(nilai);
-            pekerja.setRating(rataRating);
+            // BOLT OPTIMIZATION: Replaced memory-intensive stream aggregation with direct DB query
+            Double rataRating = orderRepository.findAverageRatingByPekerjaId(pekerja.getId());
+            pekerja.setRating(rataRating != null ? rataRating : nilai);
             pekerjaRepository.save(pekerja);
         }
         return orderRepository.save(order);

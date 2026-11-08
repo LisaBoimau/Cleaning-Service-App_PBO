@@ -1,0 +1,3 @@
+## 2026-11-08 - [Avoid In-Memory Filtering and Aggregation]
+**Learning:** [OrderService previously loaded entire collections into memory using `findAll()`/`findByStatus()` and `findByPekerjaId()` only to apply sorting and average aggregations using Java Streams. This creates a significant memory bottleneck on larger datasets as all objects are fully instantiated into JVM memory.]
+**Action:** [Always leverage database features by replacing Java Streams for sorting, filtering, and aggregation with appropriate custom Spring Data JPA derived queries (e.g. `findFirstByStatusOrderByRatingDesc()`) or `@Query` annotations utilizing database aggregate functions.]
