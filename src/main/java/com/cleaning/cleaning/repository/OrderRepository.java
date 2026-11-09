@@ -10,4 +10,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByPelangganId(Long pelangganId);
     List<Order> findByPekerjaId(Long pekerjaId);
     List<Order> findByStatus(String status);
+
+    @org.springframework.data.jpa.repository.Query("SELECT AVG(o.nilaiRating) FROM Order o WHERE o.pekerja.id = :pekerjaId AND o.nilaiRating > 0")
+    Double findAverageRatingByPekerjaId(@org.springframework.data.repository.query.Param("pekerjaId") Long pekerjaId);
 }
