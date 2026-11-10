@@ -45,10 +45,8 @@ public class OrderService {
         }
         if (pekerja == null) {
             // Fallback: ambil pekerja available dengan rating tertinggi
-            List<Pekerja> available = pekerjaRepository.findByStatus("available");
-            pekerja = available.stream()
-                    .max(java.util.Comparator.comparingDouble(Pekerja::getRating))
-                    .orElse(null);
+            // Bolt Optimization: Offloaded sorting to DB to prevent loading all available workers into memory
+            pekerja = pekerjaRepository.findFirstByStatusOrderByRatingDesc("available");
         }
         if (pekerja != null) {
             order.setPekerja(pekerja);
@@ -81,12 +79,9 @@ public class OrderService {
         order.berikanRating(nilai, komentar);
         if (order.getPekerja() != null) {
             Pekerja pekerja = order.getPekerja();
-            List<Order> orderPekerja = orderRepository.findByPekerjaId(pekerja.getId());
-            double rataRating = orderPekerja.stream()
-                    .filter(o -> o.getNilaiRating() > 0)
-                    .mapToInt(Order::getNilaiRating)
-                    .average()
-                    .orElse(nilai);
+            // Bolt Optimization: Offloaded average rating calculation to DB to prevent loading all worker orders into memory
+            Double avg = orderRepository.findAverageRatingByPekerjaId(pekerja.getId());
+            double rataRating = (avg != null && avg > 0) ? avg : nilai;
             pekerja.setRating(rataRating);
             pekerjaRepository.save(pekerja);
         }
