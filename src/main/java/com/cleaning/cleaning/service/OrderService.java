@@ -44,11 +44,8 @@ public class OrderService {
             pekerja = pekerjaRepository.findById(pekerjaId).orElse(null);
         }
         if (pekerja == null) {
-            // Fallback: ambil pekerja available dengan rating tertinggi
-            List<Pekerja> available = pekerjaRepository.findByStatus("available");
-            pekerja = available.stream()
-                    .max(java.util.Comparator.comparingDouble(Pekerja::getRating))
-                    .orElse(null);
+            // Optimisasi: Ambil pekerja available dengan rating tertinggi langsung dari database (menghindari O(N) sort di memori)
+            pekerja = pekerjaRepository.findFirstByStatusOrderByRatingDesc("available").orElse(null);
         }
         if (pekerja != null) {
             order.setPekerja(pekerja);
@@ -79,18 +76,19 @@ public class OrderService {
     public Order berikanRating(Long id, int nilai, String komentar) {
         Order order = getOrderById(id);
         order.berikanRating(nilai, komentar);
+        order = orderRepository.save(order); // Save the order to ensure it's in the DB before calculating average
+
         if (order.getPekerja() != null) {
             Pekerja pekerja = order.getPekerja();
-            List<Order> orderPekerja = orderRepository.findByPekerjaId(pekerja.getId());
-            double rataRating = orderPekerja.stream()
-                    .filter(o -> o.getNilaiRating() > 0)
-                    .mapToInt(Order::getNilaiRating)
-                    .average()
-                    .orElse(nilai);
+
+            // Optimisasi: Hitung rata-rata rating langsung di database, bukan memuat semua order ke memori
+            Double rataRatingDb = orderRepository.getAverageRatingByPekerjaId(pekerja.getId());
+            double rataRating = (rataRatingDb != null) ? rataRatingDb : nilai;
+
             pekerja.setRating(rataRating);
             pekerjaRepository.save(pekerja);
         }
-        return orderRepository.save(order);
+        return order;
     }
 
     public void batalkanOrder(Long id) {
